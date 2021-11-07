@@ -1,0 +1,24 @@
+@page "/Tools/PaymentCalculator"
+<h3>PaymentCalculator</h3>
+
+<RadzenCard Style="width: 30%">
+    <RadzenLabel Text="Loan Value:"/>
+    <RadzenNumeric @bind-Value="@_loanValue" ShowUpDown="false" Min="0" Format="C"/>
+    
+    <RadzenLabel Text="Interest Rate:"/>
+    <RadzenRadioButtonList TValue="int" @bind-Value="@_interestType" Change="@ChangeInterestType">
+        <Items>
+            <RadzenRadioButtonListItem Text="Annual" Value="0"/>
+            <RadzenRadioButtonListItem Text="Monthly" Value="1"/>
+        </Items>
+    </RadzenRadioButtonList>
+    <RadzenNumeric @bind-Value="@_interestRate" ShowUpDown="false" Min="0" Format="0.00" />%
+    
+    <RadzenLabel Text="Number Of Payments:"/>
+    <RadzenNumeric @bind-Value="@_numberOfPayments" ShowUpDown="false" Min="0" />
+    <RadzenButton Text="Calculate" Click="@CalculatePayment" />
+</RadzenCard>
+<RadzenCard Visible="@(_paymentAmount > 0)">
+    <RadzenLabel Text="PaymentAmount:"/>
+    @_paymentAmount.ToString("C")
+</RadzenCard>
