@@ -5,6 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="AntDesign" Version="0.10.2" />
       <PackageReference Include="Radzen.Blazor" Version="3.11.12" />
     </ItemGroup>
 
