@@ -25,17 +25,17 @@
 
 <Card Bordered="true" Class="card">
     <Form Model="@_loan" OnFinish="_loan.CalculatePayment">
-        <FormItem Label="Loan Value:">
+        <FormItem Label="Loan Value">
             <AntDesign.InputNumber @bind-Value="@context.PrincipalValue" Min="0" Step="1000" Formatter="@(value => value.ToString("C"))" Style="width: 50%"/>
         </FormItem>
-        <FormItem Label="Interest Rate:">
+        <FormItem Label="Interest Rate">
             <RadioGroup TValue="Loan.InterestFrequency" @bind-Value="@context.Frequency" OnChange="@_loan.ChangeInterestType">
                 <Radio Value="Loan.InterestFrequency.Annually">Annually</Radio>
                 <Radio Value="Loan.InterestFrequency.Monthly">Monthly</Radio>
             </RadioGroup>
             <AntDesign.InputNumber @bind-Value="@_loan.InterestRate" Step="1" Min="0" Formatter="@(value => value.ToString("N"))" Style="width: 50%"/>%
         </FormItem>
-        <FormItem Label="Number Of Payments:">
+        <FormItem Label="Number Of Payments">
             <AntDesign.InputNumber @bind-Value="@_loan.NumberOfPeriods" Step="1" Min="0" Style="width: 50%"/>
         </FormItem>
         <FormItem>
