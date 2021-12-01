@@ -49,5 +49,23 @@ namespace LoanHelper.Models
             var percentRate = Frequency == InterestFrequency.Annually ? (InterestRate / 100d) / 12d : InterestRate / 100d;
             PaymentAmount = (percentRate * PrincipalValue) / (1 - Math.Pow(1 + percentRate, NumberOfPeriods * -1));
         }
+        
+        /// <summary>
+        /// Calculates the periods required to pay off loan when all other info is given
+        /// </summary>
+        public void CalculatePeriods()
+        {
+            // Check for valid data. Just returns for now.
+            if (PrincipalValue <= 0 || PaymentAmount <= 0 || InterestRate < 0) return;
+            
+            // -log(1 - r(PV)/P) / log(1+r)
+            var percentRate = Frequency == InterestFrequency.Annually ? (InterestRate / 100d) / 12d : InterestRate / 100d;
+            
+            // Check number in log for negative to avoid issues
+            var innerLog = 1 - ((percentRate * PrincipalValue) / PaymentAmount);
+            if (innerLog < 0) return;
+            
+            NumberOfPeriods = (int) Math.Ceiling(-Math.Log(innerLog) / Math.Log(1 + percentRate));
+        }
     }
 }
