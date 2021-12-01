@@ -1,24 +1,53 @@
 @page "/Tools/PaymentCalculator"
-<h3>PaymentCalculator</h3>
+@using LoanHelper.Models
 
-<RadzenCard Style="width: 30%">
-    <RadzenLabel Text="Loan Value:"/>
-    <RadzenNumeric @bind-Value="@_loanValue" ShowUpDown="false" Min="0" Format="C"/>
+<style>
+    .card {
+        width: 30%;
+        background: #1a1a30;
+    }
     
-    <RadzenLabel Text="Interest Rate:"/>
-    <RadzenRadioButtonList TValue="int" @bind-Value="@_interestType" Change="@ChangeInterestType">
-        <Items>
-            <RadzenRadioButtonListItem Text="Annual" Value="0"/>
-            <RadzenRadioButtonListItem Text="Monthly" Value="1"/>
-        </Items>
-    </RadzenRadioButtonList>
-    <RadzenNumeric @bind-Value="@_interestRate" ShowUpDown="false" Min="0" Format="0.00" />%
+    .card * {
+        color: #ffffff !important;
+    }
     
-    <RadzenLabel Text="Number Of Payments:"/>
-    <RadzenNumeric @bind-Value="@_numberOfPayments" ShowUpDown="false" Min="0" />
-    <RadzenButton Text="Calculate" Click="@CalculatePayment" />
-</RadzenCard>
-<RadzenCard Visible="@(_paymentAmount > 0)">
-    <RadzenLabel Text="PaymentAmount:"/>
-    @_paymentAmount.ToString("C")
-</RadzenCard>
+    .card * input, .card * button {
+        background: #292B33;
+    }
+    
+    @* Overwrite AntBlazor style for arrows on InputNumber *@
+    .ant-input-number-handler {
+        background: #292B33;
+    }
+</style>
+
+<h3 style="color: #ffffff">Payment Calculator</h3>
+
+<Card Bordered="true" Class="card">
+    <Form Model="@_loan" OnFinish="_loan.CalculatePayment">
+        <FormItem Label="Loan Value:">
+            <AntDesign.InputNumber @bind-Value="@context.PrincipalValue" Min="0" Step="1000" Formatter="@(value => value.ToString("C"))" Style="width: 50%"/>
+        </FormItem>
+        <FormItem Label="Interest Rate:">
+            <RadioGroup TValue="Loan.InterestFrequency" @bind-Value="@context.Frequency" OnChange="@_loan.ChangeInterestType">
+                <Radio Value="Loan.InterestFrequency.Annually">Annually</Radio>
+                <Radio Value="Loan.InterestFrequency.Monthly">Monthly</Radio>
+            </RadioGroup>
+            <AntDesign.InputNumber @bind-Value="@_loan.InterestRate" Step="1" Min="0" Formatter="@(value => value.ToString("N"))" Style="width: 50%"/>%
+        </FormItem>
+        <FormItem Label="Number Of Payments:">
+            <AntDesign.InputNumber @bind-Value="@_loan.NumberOfPeriods" Step="1" Min="0" Style="width: 50%"/>
+        </FormItem>
+        <FormItem>
+            <Button HtmlType="submit">Calculate</Button>
+        </FormItem>
+    </Form>
+</Card>
+
+@if (_loan.PaymentAmount > 0)
+{
+    <Card Bordered="true" Class="card">
+        <label>Payment Amount:</label>
+        @_loan.PaymentAmount.ToString("C")
+    </Card>
+}
