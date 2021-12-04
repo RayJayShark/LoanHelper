@@ -1,0 +1,64 @@
+@page "/Tools/MortgageEquity"
+@using LoanHelper.Models
+
+<style>
+    .card {
+        width: 30%;
+        background: #1a1a30;
+    }
+    
+    .card * {
+        color: #ffffff !important;
+    }
+    
+    .card * input, .card * button {
+        background: #292B33;
+    }
+    
+    @* Overwrite AntBlazor style for arrows on InputNumber *@
+    .ant-input-number-handler {
+        background: #292B33;
+    }
+</style>
+
+<h3 style="color: #ffffff">Mortgage Equity</h3>
+
+<Card Bordered="true" Class="card">
+    <Form Model="@_loan" OnFinish="@Calculate">
+        <FormItem Label="Principal">
+            <AntDesign.InputNumber @bind-Value="@context.PrincipalValue" Min="0" Formatter="@(value => value.ToString("C"))" Style="width: 50%"/>
+        </FormItem>
+        <FormItem Label="Interest Rate">
+            <RadioGroup TValue="Loan.InterestFrequency" @bind-Value="@context.Frequency" OnChange="@_loan.ChangeInterestType">
+                <Radio Value="Loan.InterestFrequency.Annually">Annually</Radio>
+                <Radio Value="Loan.InterestFrequency.Monthly">Monthly</Radio>
+            </RadioGroup>
+            <AntDesign.InputNumber @bind-Value="@_loan.InterestRate" Min="0" Formatter="@(value => value.ToString("N"))" Style="width: 50%"/>%
+        </FormItem>
+        <FormItem Label="Escrow Payment:">
+            <AntDesign.InputNumber @bind-Value="@_loan.EscrowPayment" Min="0" Formatter="@(value => value.ToString("C"))" Style="width: 50%"/>
+        </FormItem>
+        <FormItem Label="Payment Amount">
+            <AntDesign.InputNumber @bind-Value="@_loan.PaymentAmount" Min="0" Formatter="@(value => value.ToString("C"))" Style="width: 50%"/>
+        </FormItem>
+        <FormItem>
+            <Button HtmlType="submit">Calculate</Button>
+        </FormItem>
+    </Form>
+</Card>
+
+@if (_loan.LoanStates.Any())
+{
+    <Card Bordered="true" Class="card">
+        <RadzenChart>
+            <RadzenAreaSeries Data="@_loan.LoanStates" CategoryProperty="PaymentNumber" ValueProperty="CurrentPrincipal"/>
+            <RadzenValueAxis FormatString="{0:C}"/>
+        </RadzenChart>
+        <div style="color: #ffffff">
+            <label>Loan Amount:</label> @_loan.PrincipalValue.ToString("C") <br/>
+            <label>Total Interest Payed:</label> @_loan.TotalInterestPayed.ToString("C")
+            <label>Total Payed Toward Loan:</label> @((_loan.PrincipalValue + _loan.TotalInterestPayed).ToString("C"))
+            <label>Number Of Payments:</label> @_loan.LoanStates.Count
+        </div>
+    </Card>
+}

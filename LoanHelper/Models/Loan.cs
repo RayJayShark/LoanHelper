@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LoanHelper.Models
 {
@@ -9,11 +11,31 @@ namespace LoanHelper.Models
         public InterestFrequency Frequency { get; set; }
         public int NumberOfPeriods { get; set; }
         public double PaymentAmount { get; set; }
+        public double EscrowPayment { get; set; }
+        /// <summary>
+        /// The states of the loan over time
+        /// </summary>
+        public List<LoanState> LoanStates { get; set; }
+
+        private double? _totalInterestPayed;
+        public double TotalInterestPayed
+        {
+            get
+            {
+                _totalInterestPayed ??= LoanStates.Sum(state => state.Interest);
+                return _totalInterestPayed.Value;
+            }
+        }
 
         public enum InterestFrequency
         {
             Annually,
             Monthly
+        }
+
+        public Loan()
+        {
+            LoanStates = new List<LoanState>();
         }
         
         /// <summary>
