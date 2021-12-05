@@ -19,6 +19,11 @@
     .ant-input-number-handler {
         background: #292B33;
     }
+    
+    @* Overwrite Radzen style for axis titles *@
+    .rz-axis .rz-axis-title {
+        fill: #ffffff;
+    }
 </style>
 
 <h3 style="color: #ffffff">Mortgage Equity</h3>
@@ -49,10 +54,16 @@
 
 @if (_loan.LoanStates.Any())
 {
-    <Card Bordered="true" Class="card">
+    <Card Bordered="true" Class="card" Style="width: 75%">
         <RadzenChart>
-            <RadzenAreaSeries Data="@_loan.LoanStates" CategoryProperty="PaymentNumber" ValueProperty="CurrentPrincipal"/>
-            <RadzenValueAxis FormatString="{0:C}"/>
+            <RadzenAreaSeries Title="Value" Data="@_loan.LoanStates" CategoryProperty="PaymentNumber" ValueProperty="CurrentPrincipal"/>
+            <RadzenCategoryAxis Step="12">
+                <RadzenGridLines Visible="true"/>
+                <RadzenAxisTitle Text="Payment Number"/>
+            </RadzenCategoryAxis>
+            <RadzenValueAxis FormatString="{0:C}">
+                <RadzenAxisTitle Text="Principal Left"/>
+            </RadzenValueAxis>
         </RadzenChart>
         <div style="color: #ffffff">
             <label>Loan Amount:</label> @_loan.PrincipalValue.ToString("C") <br/>
