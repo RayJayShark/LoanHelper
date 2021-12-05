@@ -130,6 +130,14 @@ namespace LoanHelper.Models
             {
                 // Grab last state if available, otherwise use this object's values
                 var lastState = LoanStates.LastOrDefault();
+                
+                // If loan is growing then the loop will be infinite
+                if (lastState is not null && lastState.CurrentPrincipal > PrincipalValue)
+                {
+                    LoanStates = new List<LoanState>();
+                    return;
+                }
+                
                 var interest = (lastState?.CurrentPrincipal ?? PrincipalValue) * InterestPercentage;
 
                 LoanStates.Add(new LoanState
@@ -138,7 +146,10 @@ namespace LoanHelper.Models
                     CurrentPrincipal = (lastState?.CurrentPrincipal ?? PrincipalValue) - (PaymentAmount - interest - EscrowPayment),
                     PaymentNumber = (lastState?.PaymentNumber ?? 0) + 1
                 });
-            } while (LoanStates.Last().CurrentPrincipal > 0);
+            } while (LoanStates.Last().CurrentPrincipal > 0 || LoanStates.Count > 1000);    // Limit to 1000 states
+
+            // Zero out the last payment
+            LoanStates.Last().CurrentPrincipal = 0;
         }
     }
 }
