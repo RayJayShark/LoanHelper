@@ -24,7 +24,7 @@
 <h3 style="color: #ffffff">Mortgage Equity</h3>
 
 <Card Bordered="true" Class="card">
-    <Form Model="@_loan" OnFinish="@Calculate">
+    <Form Model="@_loan" OnFinish="@_loan.SimulateMortgage">
         <FormItem Label="Principal">
             <AntDesign.InputNumber @bind-Value="@context.PrincipalValue" Min="0" Formatter="@(value => value.ToString("C"))" Style="width: 50%"/>
         </FormItem>
@@ -56,8 +56,8 @@
         </RadzenChart>
         <div style="color: #ffffff">
             <label>Loan Amount:</label> @_loan.PrincipalValue.ToString("C") <br/>
-            <label>Total Interest Payed:</label> @_loan.TotalInterestPayed.ToString("C")
-            <label>Total Payed Toward Loan:</label> @((_loan.PrincipalValue + _loan.TotalInterestPayed).ToString("C"))
+            <label>Total Interest Payed:</label> @_loan.TotalInterestPayed.ToString("C") <br/>
+            <label>Total Payed Toward Loan:</label> @((_loan.PrincipalValue + _loan.TotalInterestPayed).ToString("C")) <br/>
             <label>Number Of Payments:</label> @_loan.LoanStates.Count
         </div>
     </Card>

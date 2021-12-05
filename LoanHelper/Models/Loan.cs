@@ -89,5 +89,32 @@ namespace LoanHelper.Models
             
             NumberOfPeriods = (int) Math.Ceiling(-Math.Log(innerLog) / Math.Log(1 + percentRate));
         }
+        
+        /// <summary>
+        /// Simulates a mortgage and stores the data in LoanStates
+        /// </summary>
+        public void SimulateMortgage()
+        {
+            // Check for valid data. Just returns for now.
+            if (PrincipalValue <= 0 || PaymentAmount <= 0 || InterestRate < 0 || EscrowPayment <= 0) return;
+
+            // Remove data from previous calculations
+            LoanStates = new List<LoanState>();
+
+            // Loop to calculate individual payments
+            do
+            {
+                // Grab last state if available, otherwise use this object's values
+                var lastState = LoanStates.LastOrDefault();
+                var interest = (lastState?.CurrentPrincipal ?? PrincipalValue) * ((InterestRate / 12d) / 100d);
+
+                LoanStates.Add(new LoanState
+                {
+                    Interest = interest,
+                    CurrentPrincipal = (lastState?.CurrentPrincipal ?? PrincipalValue) - (PaymentAmount - interest - EscrowPayment),
+                    PaymentNumber = (lastState?.PaymentNumber ?? 0) + 1
+                });
+            } while (LoanStates.Last().CurrentPrincipal > 0);
+        }
     }
 }
