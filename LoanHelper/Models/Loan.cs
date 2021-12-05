@@ -7,6 +7,7 @@ namespace LoanHelper.Models
     public class Loan
     {
         public double PrincipalValue { get; set; }
+        public double RealEstateValue { get; set; }
 
         private double _interestRate;
         public double InterestRate
@@ -50,6 +51,36 @@ namespace LoanHelper.Models
             {
                 _totalInterestPayed ??= LoanStates.Sum(state => state.Interest);
                 return _totalInterestPayed.Value;
+            }
+        }
+        
+        /// <summary>
+        /// The states of equity over time
+        /// </summary>
+        public List<EquityState> EquityStates { get; set; }
+
+        private double _realEstateGrowthRate;
+        /// <summary>
+        /// Percentage annual growth rate of real estate value
+        /// </summary>
+        public double RealEstateGrowthRate {
+            get => _realEstateGrowthRate;
+            set
+            {
+                _growthRatePercentage = null;
+                _realEstateGrowthRate = value;
+            }
+        }
+
+        private double? _growthRatePercentage;
+        /// <summary>
+        /// Converts the RealEstateGrowthRate to a percentage to be used in formulas
+        /// </summary>
+        public double GrowthRatePercentage {
+            get
+            {
+                _growthRatePercentage ??= (RealEstateGrowthRate / 100d) / 12d;
+                return _growthRatePercentage.Value;
             }
         }
 
@@ -120,31 +151,40 @@ namespace LoanHelper.Models
         public void SimulateMortgage()
         {
             // Check for valid data. Just returns for now.
-            if (PrincipalValue <= 0 || PaymentAmount <= 0 || InterestRate < 0 || EscrowPayment <= 0) return;
+            if (PrincipalValue <= 0 || PaymentAmount <= 0 || InterestRate < 0 || RealEstateGrowthRate < 0 || EscrowPayment <= 0) return;
 
             // Remove data from previous calculations
             LoanStates = new List<LoanState>();
+            EquityStates = new List<EquityState>();
 
             // Loop to calculate individual payments
             do
             {
                 // Grab last state if available, otherwise use this object's values
-                var lastState = LoanStates.LastOrDefault();
+                var lastLoanState = LoanStates.LastOrDefault();
+                var lastEquityState = EquityStates.LastOrDefault();
                 
                 // If loan is growing then the loop will be infinite
-                if (lastState is not null && lastState.CurrentPrincipal > PrincipalValue)
+                if (lastLoanState is not null && lastLoanState.CurrentPrincipal > PrincipalValue)
                 {
                     LoanStates = new List<LoanState>();
                     return;
                 }
                 
-                var interest = (lastState?.CurrentPrincipal ?? PrincipalValue) * InterestPercentage;
-
+                var interest = (lastLoanState?.CurrentPrincipal ?? PrincipalValue) * InterestPercentage;
                 LoanStates.Add(new LoanState
                 {
                     Interest = interest,
-                    CurrentPrincipal = (lastState?.CurrentPrincipal ?? PrincipalValue) - (PaymentAmount - interest - EscrowPayment),
-                    PaymentNumber = (lastState?.PaymentNumber ?? 0) + 1
+                    CurrentPrincipal = (lastLoanState?.CurrentPrincipal ?? PrincipalValue) - (PaymentAmount - interest - EscrowPayment),
+                    PaymentNumber = (lastLoanState?.PaymentNumber ?? 0) + 1
+                });
+
+                var updatedRealEstateValue = (lastEquityState?.CurrentRealEstateValue ?? RealEstateValue) * (1 + GrowthRatePercentage);
+                EquityStates.Add(new EquityState
+                {
+                    CurrentEquity = updatedRealEstateValue - LoanStates.Last().CurrentPrincipal,
+                    CurrentRealEstateValue = updatedRealEstateValue,
+                    PaymentNumber = LoanStates.Last().PaymentNumber     // Grab the payment number from the last loan state to ensure they align
                 });
             } while (LoanStates.Last().CurrentPrincipal > 0 || LoanStates.Count > 1000);    // Limit to 1000 states
 

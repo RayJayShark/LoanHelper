@@ -30,6 +30,12 @@
 
 <Card Bordered="true" Class="card">
     <Form Model="@_loan" OnFinish="@_loan.SimulateMortgage">
+        <FormItem Label="Real Estate Value">
+            <AntDesign.InputNumber @bind-Value="@context.RealEstateValue" Min="0" Formatter="@(value => value.ToString("C"))" Style="width: 50%"/>
+        </FormItem>
+        <FormItem Label="Annual Real Estate Value Growth Rate">
+            <AntDesign.InputNumber @bind-Value="@context.RealEstateGrowthRate" Min="0" Formatter="@(value => value.ToString("N"))" Style="width: 50%"/>%
+        </FormItem>
         <FormItem Label="Principal">
             <AntDesign.InputNumber @bind-Value="@context.PrincipalValue" Min="0" Formatter="@(value => value.ToString("C"))" Style="width: 50%"/>
         </FormItem>
@@ -56,13 +62,14 @@
 {
     <Card Bordered="true" Class="card" Style="width: 75%">
         <RadzenChart>
-            <RadzenAreaSeries Title="Value" Data="@_loan.LoanStates" CategoryProperty="PaymentNumber" ValueProperty="CurrentPrincipal"/>
-            <RadzenCategoryAxis Step="12">
+            <RadzenAreaSeries Title="Loan Value" Data="@_loan.LoanStates" CategoryProperty="PaymentNumber" ValueProperty="CurrentPrincipal"/>
+            <RadzenAreaSeries Title="Equity" Data="@_loan.EquityStates" CategoryProperty="PaymentNumber" ValueProperty="CurrentEquity"/>
+            <RadzenCategoryAxis Min="0" Step="12">
                 <RadzenGridLines Visible="true"/>
                 <RadzenAxisTitle Text="Payment Number"/>
             </RadzenCategoryAxis>
             <RadzenValueAxis FormatString="{0:C}">
-                <RadzenAxisTitle Text="Principal Left"/>
+                <RadzenAxisTitle Text="Value"/>
             </RadzenValueAxis>
         </RadzenChart>
         <div style="color: #ffffff">
