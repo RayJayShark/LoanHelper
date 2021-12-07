@@ -154,6 +154,7 @@ namespace LoanHelper.Models
             if (PrincipalValue <= 0 || PaymentAmount <= 0 || InterestRate < 0 || RealEstateGrowthRate < 0 || EscrowPayment <= 0) return;
 
             // Remove data from previous calculations, initialize with first state (no payments)
+            _totalInterestPayed = null;
             LoanStates = new List<LoanState>{new LoanState
             {
                 CurrentPrincipal = PrincipalValue,
@@ -196,7 +197,7 @@ namespace LoanHelper.Models
                     CurrentRealEstateValue = updatedRealEstateValue,
                     PaymentNumber = LoanStates.Last().PaymentNumber     // Grab the payment number from the last loan state to ensure they align
                 });
-            } while (LoanStates.Last().CurrentPrincipal > 0 || LoanStates.Count > 1000);    // Limit to 1000 states
+            } while (LoanStates.Last().CurrentPrincipal > 0 && LoanStates.Count < 1000);    // Limit to 1000 states
 
             // Zero out the last payment
             LoanStates.Last().CurrentPrincipal = 0;
