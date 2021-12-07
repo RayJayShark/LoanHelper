@@ -153,33 +153,43 @@ namespace LoanHelper.Models
             // Check for valid data. Just returns for now.
             if (PrincipalValue <= 0 || PaymentAmount <= 0 || InterestRate < 0 || RealEstateGrowthRate < 0 || EscrowPayment <= 0) return;
 
-            // Remove data from previous calculations
-            LoanStates = new List<LoanState>();
-            EquityStates = new List<EquityState>();
+            // Remove data from previous calculations, initialize with first state (no payments)
+            LoanStates = new List<LoanState>{new LoanState
+            {
+                CurrentPrincipal = PrincipalValue,
+                Interest = 0,
+                PaymentNumber = 0
+            }};
+            EquityStates = new List<EquityState>{new EquityState
+            {
+                CurrentEquity = 0,
+                CurrentRealEstateValue = RealEstateValue,
+                PaymentNumber = 0
+            }};
 
             // Loop to calculate individual payments
             do
             {
-                // Grab last state if available, otherwise use this object's values
-                var lastLoanState = LoanStates.LastOrDefault();
-                var lastEquityState = EquityStates.LastOrDefault();
+                // Grab last state
+                var lastLoanState = LoanStates.Last();
+                var lastEquityState = EquityStates.Last();
                 
                 // If loan is growing then the loop will be infinite
-                if (lastLoanState is not null && lastLoanState.CurrentPrincipal > PrincipalValue)
+                if (lastLoanState.CurrentPrincipal > PrincipalValue)
                 {
                     LoanStates = new List<LoanState>();
                     return;
                 }
                 
-                var interest = (lastLoanState?.CurrentPrincipal ?? PrincipalValue) * InterestPercentage;
+                var interest = (lastLoanState.CurrentPrincipal) * InterestPercentage;
                 LoanStates.Add(new LoanState
                 {
                     Interest = interest,
-                    CurrentPrincipal = (lastLoanState?.CurrentPrincipal ?? PrincipalValue) - (PaymentAmount - interest - EscrowPayment),
-                    PaymentNumber = (lastLoanState?.PaymentNumber ?? 0) + 1
+                    CurrentPrincipal = (lastLoanState.CurrentPrincipal) - (PaymentAmount - interest - EscrowPayment),
+                    PaymentNumber = ++lastLoanState.PaymentNumber
                 });
 
-                var updatedRealEstateValue = (lastEquityState?.CurrentRealEstateValue ?? RealEstateValue) * (1 + GrowthRatePercentage);
+                var updatedRealEstateValue = lastEquityState.CurrentRealEstateValue * (1 + GrowthRatePercentage);
                 EquityStates.Add(new EquityState
                 {
                     CurrentEquity = updatedRealEstateValue - LoanStates.Last().CurrentPrincipal,

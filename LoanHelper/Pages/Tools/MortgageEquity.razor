@@ -76,7 +76,7 @@
             <label>Loan Amount:</label> @_loan.PrincipalValue.ToString("C") <br/>
             <label>Total Interest Payed:</label> @_loan.TotalInterestPayed.ToString("C") <br/>
             <label>Total Payed Toward Loan:</label> @((_loan.PrincipalValue + _loan.TotalInterestPayed).ToString("C")) <br/>
-            <label>Number Of Payments:</label> @_loan.LoanStates.Count
+            <label>Number Of Payments:</label> @_loan.LoanStates.Last().PaymentNumber
         </div>
     </Card>
 }
